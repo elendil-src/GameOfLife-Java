@@ -1,10 +1,13 @@
 package com.elendil.training;
 
 import java.util.*;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
- * Represents a Universe of cells. Responsible for setting up the initial state, and triggering the next generation.
+ * Represents a Universe of cells. Responsible for setting up the initial state, and triggering the
+ * next generation.
  */
 class Universe {
 
@@ -19,7 +22,7 @@ class Universe {
      * @param seedAlivePercent  percentage of the square that should be living cells.
      */
     Universe(int dimension, int seedAlivePercent) {
-        // Create universe as collection of dimension*dimension cells. See with living cells randomly at given rate.
+        // Create universe as collection of dimension*dimension cells. Seed with living cells randomly at given rate.
         universe = new HashSet<>(dimension ^ 2);
         seedUniverse(dimension, seedAlivePercent);
     }
@@ -41,20 +44,49 @@ class Universe {
     }
 
     /**
+     * Internal class to hold the state of the generation, specifically the row/col nos.
+     * TODO This is overly complex. If row and column were removed from Cell and inferred as position
+     * in Universes's collection wolud it simplify things?
+     */
+    class  CellSupplier implements Supplier<Cell>
+    {
+        final private int dimension;
+        final private int seedAlivePercent;
+        private int count = 0;
+
+        CellSupplier(int dimension, int seedAlivePercent) {
+            this.dimension = dimension;
+            this.seedAlivePercent = seedAlivePercent;
+        }
+
+        @Override
+        public Cell get() {
+            Cell c =  createCell(count % dimension, count / dimension, seedAlivePercent);
+            count++;
+            return  c;
+        }
+    }
+
+
+    /**
      *  Seed the universe
      * @param dimension  dimension of the square
      * @param seedAlivePercent  percentage of the square that should be living cells.
      */
     private void seedUniverse(int dimension, int seedAlivePercent) {
-        for (int x = 0; x < dimension; x++) {
-            for (int y = 0; y < dimension; y++) {
-                universe.add(createCell(x, y, seedAlivePercent));
-            }
-        }
+
+        Supplier<Cell> cellSupplier = new CellSupplier(dimension,seedAlivePercent);
+
+        // TODO This should be simpler with a iterate() rather than generate().
+        this.universe = Stream.generate(cellSupplier)
+                        .takeWhile( c -> c.getY() < dimension && c.getX() < dimension)
+                        .collect(Collectors.toSet());
     }
+
 
     /**
      * Return copy of universe; no guarantee about order etc.
+     * TODO return an immutable copy
      * @return copy of cells in universe; no guarantee about order etc.
      */
     Collection<Cell> getUniverse() {
@@ -68,6 +100,7 @@ class Universe {
 
         Collection<Cell> nextGeneration = new HashSet<>(universe.size());
 
+        //TODO - make more readable with a stream?
         universe.forEach(c -> nextGeneration.add(Universe.calculateNextCellState(c, universe)));
         universe = nextGeneration;
     }
