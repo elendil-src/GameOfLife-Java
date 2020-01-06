@@ -3,10 +3,7 @@ package com.elendil.training;
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 
 public class TestUniverse {
 
@@ -35,24 +32,21 @@ public class TestUniverse {
     public void givenUniverseSetup_when0PercentSeedAndDimOne_thenUniverse0PercentAlive() {
         Universe universe = new Universe(1, 0);
         Collection<Cell> resultUniverse = universe.getUniverse();
-        resultUniverse.removeIf(c -> c instanceof LivingCell);
-        Assert.assertTrue((resultUniverse.size() == 1));
+        Assert.assertTrue(resultUniverse.stream().allMatch(c -> c instanceof DeadCell));
     }
 
     @Test
     public void givenUniverseSetup_when100PercentSeedAndDimOne_thenUniverse100PercentAlive() {
         Universe universe = new Universe(1, 100);
         Collection<Cell> resultUniverse = universe.getUniverse();
-        resultUniverse.removeIf(c -> c instanceof DeadCell);
-        Assert.assertTrue((resultUniverse.size() == 1));
+        Assert.assertTrue(resultUniverse.stream().allMatch(c -> c instanceof LivingCell));
     }
 
     @Test
     public void givenUniverseSetup_when100PercentSeedAndDimNine_thenUniverse100PercentAlive() {
         Universe universe = new Universe(9, 100);
-        Collection<Cell> resultUniverse = universe.getUniverse();
-        resultUniverse.removeIf(c -> c instanceof DeadCell);
-        Assert.assertTrue((resultUniverse.size() == 81));
+        Set<Cell> resultUniverse = universe.getUniverse();
+        Assert.assertTrue(resultUniverse.stream().allMatch(c -> c instanceof LivingCell));
     }
 
     @Test

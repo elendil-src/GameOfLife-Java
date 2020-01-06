@@ -11,7 +11,7 @@ import java.util.stream.Stream;
  */
 class Universe {
 
-    private Collection<Cell> universe;
+    private Set<Cell> universe;
     private Random rnGenerator = new Random();
 
     /**
@@ -45,8 +45,8 @@ class Universe {
 
     /**
      * Internal class to hold the state of the generation, specifically the row/col nos.
-     * TODO This is overly complex. If row and column were removed from Cell and inferred as position
-     * in Universes's collection wolud it simplify things?
+     * TODO Implementing the supplier is a bit heavy weight given that it needs state, but regard it as more readable
+     * TODO than a two element array to break the immutability rule.
      */
     class  CellSupplier implements Supplier<Cell>
     {
@@ -67,7 +67,6 @@ class Universe {
         }
     }
 
-
     /**
      *  Seed the universe
      * @param dimension  dimension of the square
@@ -77,20 +76,17 @@ class Universe {
 
         Supplier<Cell> cellSupplier = new CellSupplier(dimension,seedAlivePercent);
 
-        // TODO This should be simpler with a iterate() rather than generate().
         this.universe = Stream.generate(cellSupplier)
                         .takeWhile( c -> c.getY() < dimension && c.getX() < dimension)
                         .collect(Collectors.toSet());
     }
 
-
     /**
      * Return copy of universe; no guarantee about order etc.
-     * TODO return an immutable copy
-     * @return copy of cells in universe; no guarantee about order etc.
+     * @return immutable set of (mutable) cells in universe; no guarantee about order etc.
      */
-    Collection<Cell> getUniverse() {
-        return new HashSet<>(universe);
+    Set<Cell> getUniverse() {
+        return Collections.unmodifiableSet(universe);
     }
 
     /**
@@ -98,9 +94,8 @@ class Universe {
      */
     void nextGeneration() {
 
-        Collection<Cell> nextGeneration = new HashSet<>(universe.size());
+        Set<Cell> nextGeneration = new HashSet<>(universe.size());
 
-        //TODO - make more readable with a stream?
         universe.forEach(c -> nextGeneration.add(Universe.calculateNextCellState(c, universe)));
         universe = nextGeneration;
     }
@@ -122,7 +117,7 @@ class Universe {
 
     /**
      * Sort universe into a two dimensional array of cells.
-     * @return Current universe sorted by rows then columns
+     * @return  copy of two dimensional array of universe sorted by rows then columns
      */
     List<List<Cell>> toRowAndColumn() {
 

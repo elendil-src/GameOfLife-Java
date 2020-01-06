@@ -17,46 +17,58 @@ public class GameOfLife {
      */
     public static void main(String[] args) {
 
-        int universeDimension = 8; // Default
-        int seedAlivePercent = 50; // Default
+        int universeDimension = 8; // Default - TODO  - make command line arg
+        int seedAlivePercent = 50; // Default - TODO  - make command line arg
 
         Universe universe = new Universe(universeDimension, seedAlivePercent);
 
-        boolean doNext = true;
-        System.out.printf("Game of life: dimension=%d; seeded=%d percent.\n" +
-                        "Enter 'Enter' to view next generation, or anything else to quit.\n",
-                universeDimension, seedAlivePercent);
+        System.out.printf("Game of life: dimension=%d; seeded=%d percent.\n", universeDimension, seedAlivePercent);
+
+        evolveUniverse(universe);
+    }
+
+    /**
+     * Evolves universe, handling user input
+     * @param universe universe to evolve
+     */
+    private static void evolveUniverse(Universe universe) {
+        final String COMMAND_DESC = "'Enter' to view next generation, or anything else to quit.";
 
         Scanner scanner = new Scanner(System.in);
         int generationCount = 0;
         do {
-            System.out.printf("Generation:%d\n", generationCount++);
+            System.out.printf("Generation:%d: " + COMMAND_DESC + "\n", generationCount++);
             outputUniverse(universe, System.out);
 
-            String input = scanner.nextLine();
-            if (input.length() != 0)
-                doNext = false;
-            else
+            if (userContinue(scanner))
                 universe.nextGeneration();
-        } while (doNext);
+            else break;
+        } while (true);
         System.out.println("Now exited");
     }
 
+    private static boolean userContinue(Scanner scanner) {
+        return scanner.nextLine().length() == 0;
+    }
+
     /**
-     * Outputs universe's current state to output stream.
+     * Outputs universe's current state to output stream. Prints as grid.
      * @param universe to be displayed
      * @param os output stream to be displayed to.
      */
     private static void outputUniverse(Universe universe, PrintStream os) {
 
         List<List<Cell>> universeByRowAndCol = universe.toRowAndColumn();
+        universeByRowAndCol.forEach( rowList -> outputRow(os, rowList));
+    }
 
-        universeByRowAndCol.forEach(
-                rowList ->
-                {
-                    rowList.forEach(cell -> os.print((cell instanceof LivingCell ? '*' : ' ')));
-                    os.println();
-                }
-        );
+    /**
+     * Output given row.. '*' for living cell; space for dead cell.
+     * @param os output stream
+     * @param rowList row of cells to output
+     */
+    private static void outputRow(PrintStream os, List<Cell> rowList) {
+        rowList.forEach(cell -> os.print((cell instanceof LivingCell ? '*' : ' ')));
+        os.println();
     }
 }
