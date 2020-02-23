@@ -2,6 +2,7 @@ package com.elendil.training;
 
 import java.io.PrintStream;
 import java.util.List;
+import java.util.Random;
 import java.util.Scanner;
 
 /**
@@ -20,9 +21,13 @@ public class GameOfLife {
         int universeDimension = 8; // Default - TODO  - make command line arg
         int seedAlivePercent = 50; // Default - TODO  - make command line arg
 
-        Universe universe = new Universe(universeDimension, seedAlivePercent);
 
-        System.out.printf("Game of life: dimension=%d; seeded=%d percent.\n", universeDimension, seedAlivePercent);
+        Random rnGenerator = new Random();
+        CellSupplier cellSupplier = new CellSupplier(universeDimension, seedAlivePercent, rnGenerator);
+
+        Universe universe = new Universe(universeDimension,cellSupplier);
+
+        System.out.printf("Game of life: dimension=%d; seeded=%d percent.%n", universeDimension, seedAlivePercent);
 
         evolveUniverse(universe);
     }

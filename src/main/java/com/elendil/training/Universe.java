@@ -11,82 +11,43 @@ import java.util.stream.Stream;
  */
 class Universe {
 
-    private Set<Cell> universe;
-    private Random rnGenerator = new Random();
+    private List<Cell> universeOfCells;
+    private Supplier<Cell> cellSupplier;
+    private final int dimension;
 
     /**
      * Constructs two dimensional square universe of cells with a percentage seeded as alive.
      * The location of the living cells is randomly determined; this may result in the actual percentage of
      * seeded living cells differing from 'seedAlivePercent'.
      * @param dimension  dimension of the square
-     * @param seedAlivePercent  percentage of the square that should be living cells.
+     * @param cellSupplier  supplier of cells, controlling percentage of the initial universe that should be living cells.
      */
-    Universe(int dimension, int seedAlivePercent) {
+    Universe(int dimension, Supplier<Cell> cellSupplier) {
+        this.cellSupplier = cellSupplier;
+        this.dimension = dimension;
+
         // Create universe as collection of dimension*dimension cells. Seed with living cells randomly at given rate.
-        universe = new HashSet<>(dimension ^ 2);
-        seedUniverse(dimension, seedAlivePercent);
+        universeOfCells = new ArrayList<>(dimension ^ 2);
+        seedUniverse();
     }
 
-    /**
-     * Create a cell at given coordinates. Use seedAlivePercent and random number generator to determine if cell
-     * is living or deead.
-     * @param x column coordinate of cell
-     * @param y row coordinate of cell
-     * @param seedAlivePercent percentage of the square that should be living cells.
-     * @return subclass of Cell.
-     */
-    private Cell createCell(int x, int y, int seedAlivePercent) {
-        int rn = rnGenerator.nextInt(99);
-        if (rn < seedAlivePercent)
-            return new LivingCell(x, y);
-        else
-            return new DeadCell(x, y);
-    }
-
-    /**
-     * Internal class to hold the state of the generation, specifically the row/col nos.
-     * TODO Implementing the supplier is a bit heavy weight given that it needs state, but regard it as more readable
-     * TODO than a two element array to break the immutability rule.
-     */
-    class  CellSupplier implements Supplier<Cell>
-    {
-        final private int dimension;
-        final private int seedAlivePercent;
-        private int count = 0;
-
-        CellSupplier(int dimension, int seedAlivePercent) {
-            this.dimension = dimension;
-            this.seedAlivePercent = seedAlivePercent;
-        }
-
-        @Override
-        public Cell get() {
-            Cell c =  createCell(count % dimension, count / dimension, seedAlivePercent);
-            count++;
-            return  c;
-        }
-    }
 
     /**
      *  Seed the universe
-     * @param dimension  dimension of the square
-     * @param seedAlivePercent  percentage of the square that should be living cells.
      */
-    private void seedUniverse(int dimension, int seedAlivePercent) {
+    private void seedUniverse() {
 
-        Supplier<Cell> cellSupplier = new CellSupplier(dimension,seedAlivePercent);
-
-        this.universe = Stream.generate(cellSupplier)
+        this.universeOfCells = Stream.generate(cellSupplier)
                         .takeWhile( c -> c.getY() < dimension && c.getX() < dimension)
-                        .collect(Collectors.toSet());
+                        .collect(Collectors.toList());
     }
 
     /**
      * Return copy of universe; no guarantee about order etc.
      * @return immutable set of (mutable) cells in universe; no guarantee about order etc.
      */
-    Set<Cell> getUniverse() {
-        return Collections.unmodifiableSet(universe);
+    List<Cell> getUniverseOfCells() {
+        return Collections.unmodifiableList(universeOfCells);
     }
 
     /**
@@ -94,10 +55,10 @@ class Universe {
      */
     void nextGeneration() {
 
-        Set<Cell> nextGeneration = new HashSet<>(universe.size());
+        List<Cell> nextGeneration = new ArrayList<>(universeOfCells.size());
 
-        universe.forEach(c -> nextGeneration.add(Universe.calculateNextCellState(c, universe)));
-        universe = nextGeneration;
+        universeOfCells.forEach(c -> nextGeneration.add(Universe.calculateNextCellState(c, universeOfCells)));
+        universeOfCells = nextGeneration;
     }
 
     /**
@@ -108,7 +69,7 @@ class Universe {
      */
     static Cell calculateNextCellState(Cell targetCell, Collection<Cell> cellSet) {
 
-        Collection<Cell> livingNeighbours = cellSet.stream().filter(c -> Cell.isNeighbour(targetCell, c))
+        Collection<Cell> livingNeighbours = cellSet.stream().filter(c -> c.isNeighbour(targetCell))
                 .filter(c -> c instanceof LivingCell)
                 .collect(Collectors.toList());
 
@@ -123,7 +84,7 @@ class Universe {
 
         List<List<Cell>> listOfRows = new LinkedList<>();
 
-        universe.stream().sorted(Comparator.comparing(Cell::getY).thenComparing(Cell::getX)).forEach(c ->
+        universeOfCells.stream().sorted(Comparator.comparing(Cell::getY).thenComparing(Cell::getX)).forEach(c ->
                 {
                     if (listOfRows.size() < c.getY() + 1)
                         listOfRows.add(c.getY(), new LinkedList<>());

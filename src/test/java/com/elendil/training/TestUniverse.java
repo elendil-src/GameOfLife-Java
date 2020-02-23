@@ -1,52 +1,81 @@
 package com.elendil.training;
 
-import org.junit.Assert;
-import org.junit.Test;
+//import org.junit.Assert;
+//import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 
 import java.util.*;
 
 public class TestUniverse {
 
+    private CellSupplier supplier = mock(CellSupplier.class);
+
+
     @Test
     public void givenUniverseSetup_whenDimOne_thenUniverseSizeIsOne() {
-        Universe universe = new Universe(1, 0);
-        Collection<Cell> resultUniverse = universe.getUniverse();
-        Assert.assertTrue((resultUniverse.size() == 1));
+
+        when(supplier.get()).thenReturn(new LivingCell(0,0))
+                            .thenReturn(new LivingCell(1,0));
+
+        Universe universe = new Universe(1, supplier);
+
+        Collection<Cell> resultUniverse = universe.getUniverseOfCells();
+        assertTrue((resultUniverse.size() == 1));
     }
+
 
     @Test
     public void givenUniverseSetup_whenDimTwo_thenUniverseSizeIsFour() {
-        Universe universe = new Universe(2, 0);
-        Collection<Cell> resultUniverse = universe.getUniverse();
-        Assert.assertTrue((resultUniverse.size() == 4));
+
+        when(supplier.get()).thenReturn(new LivingCell(0,0))
+                .thenReturn(new LivingCell(1,0))
+                .thenReturn(new LivingCell(0,1))
+                .thenReturn(new LivingCell(1,1))
+                .thenReturn(new LivingCell(0,2));
+
+        Universe universe = new Universe(2, supplier);
+
+        Collection<Cell> resultUniverse = universe.getUniverseOfCells();
+        assertTrue((resultUniverse.size() == 4));
     }
 
-    @Test
-    public void givenUniverseSetup_whenDimThree_thenUniverseSizeIsNine() {
-        Universe universe = new Universe(3, 0);
-        Collection<Cell> resultUniverse = universe.getUniverse();
-        Assert.assertTrue((resultUniverse.size() == 9));
-    }
+
+@Test
+public void givenUniverseSetup_whenDimThree_thenUniverseSizeIsNine() {
+
+    when(supplier.get()).thenReturn(new LivingCell(0,0))
+            .thenReturn(new LivingCell(1,0))
+            .thenReturn(new LivingCell(2,0))
+            .thenReturn(new LivingCell(0,1))
+            .thenReturn(new LivingCell(1,1))
+            .thenReturn(new LivingCell(2,1))
+            .thenReturn(new LivingCell(0,2))
+            .thenReturn(new LivingCell(1,2))
+            .thenReturn(new LivingCell(2,2))
+            .thenReturn(new LivingCell(0,3));
+
+    Universe universe = new Universe(3, supplier);
+
+    Collection<Cell> resultUniverse = universe.getUniverseOfCells();
+    assertTrue((resultUniverse.size() == 9));
+}
+
 
     @Test
     public void givenUniverseSetup_when0PercentSeedAndDimOne_thenUniverse0PercentAlive() {
-        Universe universe = new Universe(1, 0);
-        Collection<Cell> resultUniverse = universe.getUniverse();
-        Assert.assertTrue(resultUniverse.stream().allMatch(c -> c instanceof DeadCell));
-    }
 
-    @Test
-    public void givenUniverseSetup_when100PercentSeedAndDimOne_thenUniverse100PercentAlive() {
-        Universe universe = new Universe(1, 100);
-        Collection<Cell> resultUniverse = universe.getUniverse();
-        Assert.assertTrue(resultUniverse.stream().allMatch(c -> c instanceof LivingCell));
-    }
+        CellSupplier supplier = new CellSupplier(1,0, new Random());
+        Universe universe = new Universe(1, supplier);
 
-    @Test
-    public void givenUniverseSetup_when100PercentSeedAndDimNine_thenUniverse100PercentAlive() {
-        Universe universe = new Universe(9, 100);
-        Set<Cell> resultUniverse = universe.getUniverse();
-        Assert.assertTrue(resultUniverse.stream().allMatch(c -> c instanceof LivingCell));
+        Collection<Cell> resultUniverse = universe.getUniverseOfCells();
+        assertTrue(resultUniverse.stream().allMatch(c -> c instanceof DeadCell));
     }
 
     @Test
@@ -59,8 +88,11 @@ public class TestUniverse {
         neighbouringCells.addAll(Arrays.asList(c));
 
         Cell initialCell = new LivingCell(1, 1);
+
+        //TODO - investigate if mocking can help here.
+
         Cell nextCell = Universe.calculateNextCellState(initialCell, neighbouringCells);
-        Assert.assertEquals(nextCell, new DeadCell(1, 1));
+        assertEquals(nextCell, new DeadCell(1, 1));
     }
 
     @Test
@@ -72,9 +104,11 @@ public class TestUniverse {
         };
         neighbouringCells.addAll(Arrays.asList(c));
 
+        //TODO - investigate if mocking can help here.
+
         Cell initialCell = new LivingCell(1, 1);
         Cell nextCell = Universe.calculateNextCellState(initialCell, neighbouringCells);
-        Assert.assertEquals(nextCell, new DeadCell(1, 1));
+        assertEquals(nextCell, new DeadCell(1, 1));
     }
 
     @Test
@@ -87,8 +121,9 @@ public class TestUniverse {
         neighbouringCells.addAll(Arrays.asList(c));
 
         Cell initialCell = new LivingCell(1, 1);
+        //TODO - investigate if mocking can help here.
         Cell nextCell = Universe.calculateNextCellState(initialCell, neighbouringCells);
-        Assert.assertEquals(nextCell, new DeadCell(1, 1));
+        assertEquals(nextCell, new DeadCell(1, 1));
     }
 
     @Test
@@ -101,8 +136,9 @@ public class TestUniverse {
         neighbouringCells.addAll(Arrays.asList(c));
 
         Cell initialCell = new LivingCell(1, 1);
+        //TODO - investigate if mocking can help here.
         Cell nextCell = Universe.calculateNextCellState(initialCell, neighbouringCells);
-        Assert.assertEquals(nextCell, new LivingCell(1, 1));
+        assertEquals(nextCell, new LivingCell(1, 1));
     }
 
     @Test
@@ -115,8 +151,9 @@ public class TestUniverse {
         neighbouringCells.addAll(Arrays.asList(c));
 
         Cell initialCell = new LivingCell(1, 1);
+        //TODO - investigate if mocking can help here.
         Cell nextCell = Universe.calculateNextCellState(initialCell, neighbouringCells);
-        Assert.assertEquals(nextCell, new LivingCell(1, 1));
+        assertEquals(nextCell, new LivingCell(1, 1));
     }
 
     @Test
@@ -129,8 +166,9 @@ public class TestUniverse {
         neighbouringCells.addAll(Arrays.asList(c));
 
         Cell initialCell = new DeadCell(1, 1);
+        //TODO - investigate if mocking can help here.
         Cell nextCell = Universe.calculateNextCellState(initialCell, neighbouringCells);
-        Assert.assertEquals(nextCell, new LivingCell(1, 1));
+        assertEquals(nextCell, new LivingCell(1, 1));
     }
 
     @Test
@@ -143,8 +181,9 @@ public class TestUniverse {
         neighbouringCells.addAll(Arrays.asList(c));
 
         Cell initialCell = new DeadCell(1, 1);
+        //TODO - investigate if mocking can help here.
         Cell nextCell = Universe.calculateNextCellState(initialCell, neighbouringCells);
-        Assert.assertEquals(nextCell, new DeadCell(1, 1));
+        assertEquals(nextCell, new DeadCell(1, 1));
     }
 
     @Test
@@ -157,8 +196,9 @@ public class TestUniverse {
         neighbouringCells.addAll(Arrays.asList(c));
 
         Cell initialCell = new DeadCell(4, 4);
+        //TODO - investigate if mocking can help here.
         Cell nextCell = Universe.calculateNextCellState(initialCell, neighbouringCells);
-        Assert.assertEquals(nextCell, new DeadCell(4, 4));
+        assertEquals(nextCell, new DeadCell(4, 4));
     }
 
     @Test
@@ -172,8 +212,9 @@ public class TestUniverse {
         };
         neighbouringCells.addAll(Arrays.asList(c));
 
+        //TODO - investigate if mocking can help here.
         Cell nextCell = Universe.calculateNextCellState(initialCell, neighbouringCells);
-        Assert.assertEquals(nextCell, new LivingCell(4, 4));
+        assertEquals(nextCell, new LivingCell(4, 4));
     }
 
     @Test
@@ -187,8 +228,9 @@ public class TestUniverse {
         };
         neighbouringCells.addAll(Arrays.asList(c));
 
+        //TODO - investigate if mocking can help here.
         Cell nextCell = Universe.calculateNextCellState(initialCell, neighbouringCells);
-        Assert.assertEquals(nextCell, new LivingCell(initialCell.getX(), initialCell.getY()));
+        assertEquals(nextCell, new LivingCell(initialCell.getX(), initialCell.getY()));
     }
 
     @Test
@@ -202,91 +244,108 @@ public class TestUniverse {
         };
         neighbouringCells.addAll(Arrays.asList(c));
 
+        //TODO - investigate if mocking can help here.
         Cell nextCell = Universe.calculateNextCellState(initialCell, neighbouringCells);
-        Assert.assertEquals(nextCell, new LivingCell(initialCell.getX(), initialCell.getY()));
+        assertEquals(nextCell, new LivingCell(initialCell.getX(), initialCell.getY()));
     }
 
     @Test
     public void givenUniverse_whenCellIsAdjacent_thenIdentifyAsNeighbour() {
-        Assert.assertTrue(Cell.isNeighbour(new LivingCell(1, 1), new LivingCell(0, 0)));
-        Assert.assertTrue(Cell.isNeighbour(new DeadCell(1, 1), new DeadCell(0, 1)));
-        Assert.assertTrue(Cell.isNeighbour(new LivingCell(1, 1), new DeadCell(0, 2)));
-        Assert.assertTrue(Cell.isNeighbour(new DeadCell(1, 1), new LivingCell(1, 0)));
-        Assert.assertTrue(Cell.isNeighbour(new LivingCell(1, 1), new LivingCell(1, 2)));
-        Assert.assertTrue(Cell.isNeighbour(new LivingCell(1, 1), new LivingCell(2, 0)));
-        Assert.assertTrue(Cell.isNeighbour(new LivingCell(1, 1), new LivingCell(2, 1)));
-        Assert.assertTrue(Cell.isNeighbour(new LivingCell(1, 1), new LivingCell(2, 2)));
-        Assert.assertTrue(Cell.isNeighbour(new LivingCell(3, 3), new LivingCell(2, 2)));
-        Assert.assertTrue(Cell.isNeighbour(new DeadCell(3, 3), new DeadCell(2, 3)));
-        Assert.assertTrue(Cell.isNeighbour(new LivingCell(3, 3), new LivingCell(3, 2)));
-        Assert.assertTrue(Cell.isNeighbour(new LivingCell(3, 3), new LivingCell(3, 4)));
-        Assert.assertTrue(Cell.isNeighbour(new DeadCell(0, 0), new DeadCell(0, 1)));
-        Assert.assertTrue(Cell.isNeighbour(new LivingCell(0, 0), new LivingCell(1, 1)));
-        Assert.assertTrue(Cell.isNeighbour(new LivingCell(0, 0), new LivingCell(1, 0)));
+
+        //TODO - investigate if mocking can help here.
+        assertTrue(new LivingCell(1, 1).isNeighbour( new LivingCell(0, 0)));
+        assertTrue(new DeadCell(1, 1).isNeighbour( new DeadCell(0, 1)));
+        assertTrue(new LivingCell(1, 1).isNeighbour( new DeadCell(0, 2)));
+        assertTrue(new DeadCell(1, 1).isNeighbour( new LivingCell(1, 0)));
+        assertTrue(new LivingCell(1, 1).isNeighbour( new LivingCell(1, 2)));
+        assertTrue(new LivingCell(1, 1).isNeighbour( new LivingCell(2, 0)));
+        assertTrue(new LivingCell(1, 1).isNeighbour( new LivingCell(2, 1)));
+        assertTrue(new LivingCell(1, 1).isNeighbour( new LivingCell(2, 2)));
+        assertTrue(new LivingCell(3, 3).isNeighbour( new LivingCell(2, 2)));
+        assertTrue(new DeadCell(3, 3).isNeighbour( new DeadCell(2, 3)));
+        assertTrue(new LivingCell(3, 3).isNeighbour( new LivingCell(3, 2)));
+        assertTrue(new LivingCell(3, 3).isNeighbour( new LivingCell(3, 4)));
+        assertTrue(new DeadCell(0, 0).isNeighbour( new DeadCell(0, 1)));
+        assertTrue(new LivingCell(0, 0).isNeighbour( new LivingCell(1, 1)));
+        assertTrue(new LivingCell(0, 0).isNeighbour( new LivingCell(1, 0)));
     }
 
     @Test
     public void givenUniverse_whenCellIsSameCoord_thenIdentifyAsNotNeighbour() {
-        Assert.assertFalse(Cell.isNeighbour(new LivingCell(1, 1), new LivingCell(1, 1)));
-        Assert.assertFalse(Cell.isNeighbour(new LivingCell(0, 0), new LivingCell(0, 0)));
-        Assert.assertFalse(Cell.isNeighbour(new LivingCell(9, 9), new LivingCell(9, 9)));
+        //TODO - investigate if mocking can help here.
+        assertFalse(new LivingCell(1, 1).isNeighbour(new LivingCell(1, 1)));
+        assertFalse(new LivingCell(0, 0).isNeighbour( new LivingCell(0, 0)));
+        assertFalse(new LivingCell(9, 9).isNeighbour( new LivingCell(9, 9)));
     }
 
     @Test
     public void givenUniverse_whenCellIsNotAdjacent_thenIdentifyAsNotNeighbour() {
+        //TODO - investigate if mocking can help here.
 
-        Assert.assertFalse(Cell.isNeighbour(new LivingCell(1, 1), new LivingCell(3, 1)));
-        Assert.assertFalse(Cell.isNeighbour(new LivingCell(1, 1), new LivingCell(0, 3)));
-        Assert.assertFalse(Cell.isNeighbour(new LivingCell(1, 1), new LivingCell(3, 3)));
-        Assert.assertFalse(Cell.isNeighbour(new LivingCell(0, 0), new LivingCell(2, 2)));
-        Assert.assertFalse(Cell.isNeighbour(new LivingCell(0, 6), new LivingCell(4, 6)));
+        assertFalse(new LivingCell(1, 1).isNeighbour( new LivingCell(3, 1)));
+        assertFalse(new LivingCell(1, 1).isNeighbour( new LivingCell(0, 3)));
+        assertFalse(new LivingCell(1, 1).isNeighbour( new LivingCell(3, 3)));
+        assertFalse(new LivingCell(0, 0).isNeighbour( new LivingCell(2, 2)));
+        assertFalse(new LivingCell(0, 6).isNeighbour( new LivingCell(4, 6)));
     }
 
     @Test
     public void givenUniverse_whenDimensionIsOne_thenReturnsOneRowAndOneColumn() {
-        Universe universe = new Universe(1, 100);
+        when(supplier.get()).thenReturn(new LivingCell(0,0))
+                .thenReturn(new LivingCell(1,0));
+
+        Universe universe = new Universe(1, supplier);
         List<List<Cell>> rowAndCol = universe.toRowAndColumn();
-        Assert.assertEquals(rowAndCol.get(0).get(0), new LivingCell(0, 0));
-        Assert.assertTrue(rowAndCol.size() == 1 && rowAndCol.get(0).size() == 1);
+
+        assertEquals(rowAndCol.get(0).get(0), new LivingCell(0, 0));
+        assertTrue(rowAndCol.size() == 1 && rowAndCol.get(0).size() == 1);
     }
+
 
     @Test
     public void givenUniverse_whenDimensionIsTwo_thenReturnsTwoRowAndTwoColumn() {
-        Universe universe = new Universe(2, 0);
+
+        when(supplier.get()).thenReturn(new DeadCell(0,0))
+                .thenReturn(new DeadCell(1,0))
+                .thenReturn(new DeadCell(0,1))
+                .thenReturn(new DeadCell(1,1))
+                .thenReturn(new DeadCell(0,2));
+
+        Universe universe = new Universe(2, supplier);
         List<List<Cell>> rowAndCol = universe.toRowAndColumn();
-        Assert.assertEquals(rowAndCol.get(0).get(0), new DeadCell(0, 0));
-        Assert.assertEquals(rowAndCol.get(0).get(1), new DeadCell(1, 0));
-        Assert.assertEquals(rowAndCol.get(1).get(0), new DeadCell(0, 1));
-        Assert.assertEquals(rowAndCol.get(1).get(1), new DeadCell(1, 1));
-        Assert.assertTrue(rowAndCol.size() == 2 && rowAndCol.get(0).size() == 2);
+
+        assertEquals(rowAndCol.get(0).get(0), new DeadCell(0, 0));
+        assertEquals(rowAndCol.get(0).get(1), new DeadCell(1, 0));
+        assertEquals(rowAndCol.get(1).get(0), new DeadCell(0, 1));
+        assertEquals(rowAndCol.get(1).get(1), new DeadCell(1, 1));
+        assertTrue(rowAndCol.size() == 2 && rowAndCol.get(0).size() == 2);
     }
 
-    @Test
-    public void givenUniverse_whenDimensionIsTen_thenReturnsTenRowAndTenColumn() {
-        Universe universe = new Universe(10, 0);
-        List<List<Cell>> rowAndCol = universe.toRowAndColumn();
-        Assert.assertTrue(rowAndCol.size() == 10 && rowAndCol.get(0).size() == 10);
-    }
+
 
     @Test
     public void givenOneByOneFullAliveUniverse_whenNextGeneration_thenAllDead()
     {
-        Universe universe = new Universe(1, 0);
+        CellSupplier supplier = new CellSupplier(1, 0, new Random());
+
+        Universe universe = new Universe(1, supplier);
         universe.nextGeneration();
         List<List<Cell>> rowAndCol = universe.toRowAndColumn();
-        Assert.assertTrue(rowAndCol.get(0).get(0) instanceof DeadCell);
+        assertTrue(rowAndCol.get(0).get(0) instanceof DeadCell);
     }
 
     @Test
     public void givenTwoByTwoDeadUniverse_whenNextGeneration_thenAllAlive()
     {
-        Universe universe = new Universe(2, 100);
+        CellSupplier supplier = new CellSupplier(2, 100, new Random());
+        Universe universe = new Universe(2, supplier);
+
         universe.nextGeneration();
         List<List<Cell>> rowAndCol = universe.toRowAndColumn();
-        Assert.assertTrue(rowAndCol.get(0).get(0) instanceof LivingCell);
-        Assert.assertTrue(rowAndCol.get(0).get(1) instanceof LivingCell);
-        Assert.assertTrue(rowAndCol.get(1).get(0) instanceof LivingCell);
-        Assert.assertTrue(rowAndCol.get(1).get(1) instanceof LivingCell);
+        assertTrue(rowAndCol.get(0).get(0) instanceof LivingCell);
+        assertTrue(rowAndCol.get(0).get(1) instanceof LivingCell);
+        assertTrue(rowAndCol.get(1).get(0) instanceof LivingCell);
+        assertTrue(rowAndCol.get(1).get(1) instanceof LivingCell);
     }
 
     @Test
@@ -299,19 +358,22 @@ public class TestUniverse {
         //  A D A
         //  D D D
         //  A D A
-        Universe universe = new Universe(3, 100);
+        CellSupplier supplier = new CellSupplier(3, 100, new Random());
+        Universe universe = new Universe(3, supplier);
+
         universe.nextGeneration();
         List<List<Cell>> rowAndCol = universe.toRowAndColumn();
 
-        Assert.assertTrue(rowAndCol.get(0).get(0) instanceof LivingCell);
-        Assert.assertTrue(rowAndCol.get(0).get(2) instanceof LivingCell);
-        Assert.assertTrue(rowAndCol.get(2).get(0) instanceof LivingCell);
-        Assert.assertTrue(rowAndCol.get(2).get(2) instanceof LivingCell);
+        assertTrue(rowAndCol.get(0).get(0) instanceof LivingCell);
+        assertTrue(rowAndCol.get(0).get(2) instanceof LivingCell);
+        assertTrue(rowAndCol.get(2).get(0) instanceof LivingCell);
+        assertTrue(rowAndCol.get(2).get(2) instanceof LivingCell);
 
-        Assert.assertTrue(rowAndCol.get(0).get(1) instanceof DeadCell);
-        Assert.assertTrue(rowAndCol.get(1).get(0) instanceof DeadCell);
-        Assert.assertTrue(rowAndCol.get(1).get(1) instanceof DeadCell);
-        Assert.assertTrue(rowAndCol.get(1).get(2) instanceof DeadCell);
-        Assert.assertTrue(rowAndCol.get(2).get(1) instanceof DeadCell);
+        assertTrue(rowAndCol.get(0).get(1) instanceof DeadCell);
+        assertTrue(rowAndCol.get(1).get(0) instanceof DeadCell);
+        assertTrue(rowAndCol.get(1).get(1) instanceof DeadCell);
+        assertTrue(rowAndCol.get(1).get(2) instanceof DeadCell);
+        assertTrue(rowAndCol.get(2).get(1) instanceof DeadCell);
     }
+
 }
